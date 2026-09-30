@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>新声 NovaSound · AI 电子音乐与歌曲发布平台</title>
+<meta name="description" content="新声 NovaSound——面向全球创作者的人工智能电子音乐与歌曲发布平台。AI 作曲、编曲、混音、人声合成，一键发布到全世界。">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23070b13'/%3E%3Crect x='10' y='26' width='6' height='24' rx='3' fill='%232ee6d6'/%3E%3Crect x='20' y='16' width='6' height='42' rx='3' fill='%232ee6d6'/%3E%3Crect x='30' y='22' width='6' height='32' rx='3' fill='%23ff4fa3'/%3E%3Crect x='40' y='12' width='6' height='46' rx='3' fill='%232ee6d6'/%3E%3Crect x='50' y='28' width='6' height='20' rx='3' fill='%232ee6d6'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="https://miaoda.feishu.cn/fonts/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&family=Orbitron:wght@500;700;900&display=swap">
+<style>
+:root{
+  --bg:#070b13;
+  --bg2:#0b1120;
+  --card:#0d1524;
+  --line:rgba(150,190,240,.10);
+  --line-strong:rgba(150,190,240,.20);
+  --ink:#e9f1fb;
+  --muted:#93a7c4;
+  --cyan:#2ee6d6;
+  --pink:#ff4fa3;
+  --maxw:1180px;
+  --radius:14px;
+  --font-d:"Orbitron","Noto Sans SC",system-ui,sans-serif;
+  --font-b:"Noto Sans SC",system-ui,-apple-system,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--ink);font-family:var(--font-b);line-height:1.75;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+::selection{background:rgba(46,230,214,.28);color:#fff}
+section[id],#top{scroll-margin-top:84px}
+:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
+img{display:block;max-width:100%}
+a{color:inherit;text-decoration:none}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+.container{max-width:var(--maxw);margin:0 auto;padding:0 24px}
+.grain{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.045;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E")}
+.sec{position:relative;padding:96px 0}
+.sec-head{margin-bottom:44px;max-width:720px}
+.sec-head h2{font-size:clamp(26px,3.4vw,38px);font-weight:900;letter-spacing:.02em}
+.sec-head p{margin-top:12px;color:var(--muted);font-size:15.5px}
+.sec-head .chip{display:inline-flex;align-items:center;gap:8px;margin-bottom:16px;padding:5px 12px;border:1px solid var(--line-strong);border-radius:999px;color:var(--cyan);font-size:12.5px;font-family:var(--font-d);letter-spacing:.14em}
+.chip svg{width:14px;height:14px}
+
+/* ---------- 按钮 ---------- */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:13px 26px;border-radius:10px;font-size:15px;font-weight:700;transition:transform .18s ease,background .18s ease,border-color .18s ease;border:1px solid transparent}
+.btn:hover{transform:translateY(-2px)}
+.btn-primary{background:var(--cyan);color:#04121a}
+.btn-primary:hover{background:#5cf3e6}
+.btn-ghost{border-color:var(--line-strong);color:var(--ink)}
+.btn-ghost:hover{border-color:var(--cyan);color:var(--cyan)}
+.btn-lg{padding:15px 32px;font-size:16px}
+.btn svg{width:17px;height:17px}
+
+/* ---------- 头部 ---------- */
+.site-header{position:sticky;top:0;z-index:50;background:rgba(7,11,19,.86);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.nav{display:flex;align-items:center;justify-content:space-between;height:68px}
+.brand{display:flex;align-items:center;gap:11px;font-weight:900}
+.brand .mark{width:32px;height:32px;flex:none}
+.brand .zh{font-size:19px;letter-spacing:.06em}
+.brand .en{font-family:var(--font-d);font-size:12.5px;letter-spacing:.3em;color:var(--muted);margin-top:1px}
+.nav-links{display:flex;align-items:center;gap:6px}
+.nav-links a{padding:9px 14px;border-radius:8px;font-size:14.5px;color:var(--muted);transition:color .15s ease,background .15s ease}
+.nav-links a:hover{color:var(--ink);background:rgba(46,230,214,.08)}
+.nav-cta{margin-left:14px}
+.nav-toggle{display:none;width:42px;height:42px;align-items:center;justify-content:center;border-radius:9px;border:1px solid var(--line-strong)}
+.nav-toggle svg{width:22px;height:22px}
+.mobile-panel{display:none;position:absolute;top:68px;left:0;right:0;background:#0a101d;border-bottom:1px solid var(--line);padding:12px 20px 18px}
+.mobile-panel.open{display:block}
+.mobile-panel a{display:block;padding:12px 6px;font-size:16px;color:var(--muted);border-bottom:1px solid var(--line)}
+.mobile-panel a:last-child{border-bottom:none}
+.mobile-panel .btn{width:100%;margin-top:14px}
+
+/* ---------- Hero ---------- */
+.hero{position:relative;padding:88px 0 72px;overflow:hidden}
+.hero::before{content:"";position:absolute;inset:0;background:radial-gradient(52% 60% at 78% 30%,rgba(46,230,214,.13),transparent 70%),radial-gradient(40% 55% at 12% 82%,rgba(255,79,163,.10),transparent 70%);z-index:0}
+.hero-wave{position:absolute;left:0;right:0;bottom:18px;height:150px;opacity:.5;z-index:0}
+.hero-inner{position:relative;z-index:1;display:grid;grid-template-columns:1.08fr .92fr;gap:48px;align-items:center}
+.hero-pill{display:inline-flex;align-items:center;gap:9px;padding:6px 14px;border:1px solid var(--line-strong);border-radius:999px;font-size:12.5px;color:var(--cyan);font-family:var(--font-d);letter-spacing:.12em}
+.hero-pill svg{width:14px;height:14px}
+.hero h1{margin:22px 0 18px;font-size:clamp(34px,5.2vw,58px);line-height:1.22;font-weight:900;letter-spacing:.02em;text-wrap:balance}
+.hero h1 .grad{background:linear-gradient(100deg,var(--cyan) 10%,#7df3ea 42%,var(--pink) 88%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero .sub{margin-bottom:32px;color:var(--muted);font-size:16.5px;max-width:560px}
+.hero .ctas{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:18px}
+.hero .note{font-size:13px;color:var(--muted);display:flex;align-items:center;gap:8px}
+.hero .note svg{width:15px;height:15px;color:var(--cyan);flex:none}
+.hero-visual{position:relative}
+.hero-visual .ring{position:absolute;inset:auto;width:340px;height:340px;border-radius:50%;border:1px dashed rgba(46,230,214,.35);top:50%;left:50%;transform:translate(-50%,-50%);animation:spin 26s linear infinite}
+@keyframes spin{to{transform:translate(-50%,-50%) rotate(360deg)}}
+.hero-disc{position:relative;display:flex;flex-direction:column;gap:16px}
+.mini-track{display:flex;align-items:center;gap:14px;padding:12px;border:1px solid var(--line);border-radius:var(--radius);background:rgba(13,21,36,.72);transition:border-color .18s ease,transform .18s ease}
+.mini-track:hover{border-color:rgba(46,230,214,.45);transform:translateY(-2px)}
+.mini-art{width:52px;height:52px;border-radius:9px;flex:none;display:flex;align-items:center;justify-content:center;background:radial-gradient(120% 120% at 30% 20%,var(--c1,rgba(46,230,214,.45)),transparent 60%),radial-gradient(120% 120% at 75% 80%,var(--c2,rgba(255,79,163,.35)),transparent 60%),#0b1120}
+.mini-art svg{width:27px;height:27px;color:#9ff7f0;opacity:.9}
+.mini-track .tt{font-size:14px;font-weight:700}
+.mini-track .st{font-size:12px;color:var(--muted)}
+.mini-track .play{width:38px;height:38px;flex:none;border-radius:50%;background:var(--cyan);color:#04121a;display:flex;align-items:center;justify-content:center;transition:background .15s ease}
+.mini-track .play:hover{background:#5cf3e6}
+.mini-track .play svg{width:15px;height:15px}
+.mini-track .badge{margin-left:auto;font-size:11px;color:var(--pink);font-family:var(--font-d);letter-spacing:.1em;white-space:nowrap}
+
+/* ---------- 首发单曲 ---------- */
+#singles{background:var(--bg2);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.track-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+.track-card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:14px;display:flex;flex-direction:column;gap:12px;transition:border-color .18s ease,transform .18s ease}
+.track-card:hover{border-color:rgba(46,230,214,.4);transform:translateY(-3px)}
+.cover-art{position:relative;aspect-ratio:1/1;border-radius:10px;overflow:hidden;background:radial-gradient(120% 120% at 30% 20%,var(--c1,rgba(46,230,214,.4)),transparent 62%),radial-gradient(120% 120% at 78% 78%,var(--c2,rgba(255,79,163,.32)),transparent 60%),#0b1120;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:#9ff7f0}
+.cover-art .art-wave{width:62%;height:34%;flex:none}
+.cover-art .art-date{font-family:var(--font-d);font-size:11px;letter-spacing:.18em;color:var(--ink);opacity:.85}
+.cover-art .tag{background:rgba(7,11,19,.55);color:var(--cyan);padding:3px 9px;border-radius:999px;font-size:11px;font-family:var(--font-d);letter-spacing:.08em}
+.track-cover img{width:100%;height:100%;object-fit:cover}
+.track-body h3{font-size:16.5px;font-weight:900;letter-spacing:.01em}
+.track-body h3 .en{display:block;font-family:var(--font-d);font-size:10.5px;letter-spacing:.22em;color:var(--muted);font-weight:500;margin-top:3px}
+.track-body .artist{margin-top:7px;font-size:12.5px;color:var(--muted)}
+.player{display:flex;align-items:center;gap:10px;margin-top:2px}
+.player .pb{width:38px;height:38px;flex:none;border-radius:50%;background:var(--cyan);color:#04121a;display:flex;align-items:center;justify-content:center;transition:background .15s ease}
+.player .pb:hover{background:#5cf3e6}
+.player .pb svg{width:15px;height:15px}
+.player .pb[data-playing="1"]{background:var(--pink);color:#1a0510}
+.player .mid{flex:1;display:flex;flex-direction:column;gap:6px;min-width:0}
+.spec{width:100%;height:34px;display:block}
+.progress-row{display:flex;align-items:center;gap:9px}
+.progress-row .t{font-size:11.5px;color:var(--muted);font-family:var(--font-d);font-variant-numeric:tabular-nums;min-width:38px}
+.progress{flex:1;position:relative;height:5px;border-radius:99px;background:rgba(147,167,196,.22);cursor:pointer}
+.progress .fill{position:absolute;inset:0;border-radius:99px;background:linear-gradient(90deg,var(--cyan),var(--pink));width:0%}
+.archive{list-style:none;display:flex;flex-direction:column;gap:10px}
+.arch-item{display:flex;align-items:center;gap:14px;padding:12px 16px;border:1px solid var(--line);border-radius:11px;background:var(--card);transition:border-color .15s ease}
+.arch-item:hover{border-color:rgba(46,230,214,.4)}
+.arch-play{width:34px;height:34px;flex:none;border-radius:50%;background:rgba(46,230,214,.12);color:var(--cyan);display:flex;align-items:center;justify-content:center;transition:background .15s ease,color .15s ease}
+.arch-play:hover{background:var(--cyan);color:#04121a}
+.arch-play[data-playing="1"]{background:var(--pink);color:#1a0510}
+.arch-play svg{width:13px;height:13px}
+.arch-date{font-family:var(--font-d);font-size:12px;color:var(--muted);letter-spacing:.08em;white-space:nowrap}
+.arch-title{font-size:15px;font-weight:700;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.arch-type{font-size:12px;color:var(--pink);border:1px solid rgba(255,79,163,.35);padding:2px 9px;border-radius:999px;white-space:nowrap}
+.arch-empty{color:var(--muted);font-size:14px;padding:22px 4px}
+.daily-chip{display:inline-flex;align-items:center;gap:9px;padding:10px 18px;border:1px solid var(--line-strong);border-radius:999px;color:var(--muted);font-size:14px}
+.daily-chip svg{width:16px;height:16px;color:var(--cyan)}
+
+/* ---------- AI 引擎 ---------- */
+.engine-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+.engine-card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:26px 22px;transition:border-color .18s ease,transform .18s ease}
+.engine-card:hover{border-color:rgba(255,79,163,.4);transform:translateY(-3px)}
+.engine-card .icon{width:46px;height:46px;border-radius:12px;background:rgba(46,230,214,.10);display:flex;align-items:center;justify-content:center;margin-bottom:16px}
+.engine-card .icon svg{width:23px;height:23px;color:var(--cyan)}
+.engine-card:nth-child(2) .icon svg,.engine-card:nth-child(4) .icon svg{color:var(--pink)}
+.engine-card:nth-child(2) .icon,.engine-card:nth-child(4) .icon{background:rgba(255,79,163,.10)}
+.engine-card h3{font-size:17px;font-weight:900}
+.engine-card h3 .en{display:block;font-family:var(--font-d);font-size:10.5px;letter-spacing:.2em;color:var(--muted);font-weight:500;margin-top:4px}
+.engine-card p{margin-top:10px;color:var(--muted);font-size:14px}
+
+/* ---------- 发布流程 ---------- */
+#publish{background:var(--bg2);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;position:relative}
+.steps::before{content:"";position:absolute;top:33px;left:6%;right:6%;height:1px;background:repeating-linear-gradient(90deg,rgba(46,230,214,.5) 0 8px,transparent 8px 14px)}
+.step{position:relative;background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:24px 20px 22px}
+.step .num{width:42px;height:42px;border-radius:50%;background:var(--bg);border:1px solid var(--line-strong);display:flex;align-items:center;justify-content:center;font-family:var(--font-d);font-weight:700;color:var(--cyan);margin-bottom:16px;font-size:15px}
+.step:nth-child(2) .num{color:var(--pink)}
+.step h3{font-size:16.5px;font-weight:900}
+.step p{margin-top:9px;color:var(--muted);font-size:14px}
+
+/* ---------- 关于 ---------- */
+.about-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:48px;align-items:start}
+.about-copy h2{font-size:clamp(26px,3.4vw,38px);font-weight:900;margin-bottom:20px}
+.about-copy h2 .grad{background:linear-gradient(100deg,var(--cyan),var(--pink));-webkit-background-clip:text;background-clip:text;color:transparent}
+.about-copy p{color:var(--muted);margin-bottom:16px;font-size:15.5px}
+.about-copy .mission{border-left:3px solid var(--cyan);padding:14px 18px;background:rgba(46,230,214,.06);border-radius:0 10px 10px 0;margin:22px 0;color:var(--ink);font-size:16px;font-weight:700}
+.about-card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:28px}
+.about-card h3{font-size:15px;font-weight:900;font-family:var(--font-d);letter-spacing:.12em;color:var(--cyan);margin-bottom:18px}
+.about-card dl{display:flex;flex-direction:column}
+.about-card .row{padding:12px 0;border-bottom:1px solid var(--line);display:flex;gap:16px}
+.about-card .row:last-child{border-bottom:none}
+.about-card dt{flex:none;width:84px;color:var(--muted);font-size:13.5px}
+.about-card dd{font-size:14.5px;font-weight:500}
+.about-card .row a{color:var(--cyan)}
+.about-card .row a:hover{text-decoration:underline}
+
+/* ---------- CTA 条 ---------- */
+.cta-band{position:relative;overflow:hidden;background:linear-gradient(120deg,rgba(46,230,214,.10),rgba(255,79,163,.09)),var(--bg2);border-top:1px solid var(--line)}
+.cta-band .inner{position:relative;text-align:center;padding:76px 24px}
+.cta-band h2{font-size:clamp(26px,3.6vw,40px);font-weight:900;margin-bottom:14px}
+.cta-band h2 .grad{background:linear-gradient(100deg,var(--cyan),var(--pink));-webkit-background-clip:text;background-clip:text;color:transparent}
+.cta-band p{color:var(--muted);font-size:16px;margin-bottom:30px}
+.cta-band .ctas{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+
+/* ---------- 页脚 ---------- */
+.site-footer{border-top:1px solid var(--line);padding:52px 0 40px;background:var(--bg)}
+.footer-grid{display:flex;justify-content:space-between;gap:36px;flex-wrap:wrap}
+.footer-brand .brand{margin-bottom:12px}
+.footer-brand p{color:var(--muted);font-size:13.5px;max-width:340px}
+.footer-links{display:flex;gap:44px;flex-wrap:wrap}
+.footer-links .col h4{font-size:13px;color:var(--muted);font-weight:700;margin-bottom:12px}
+.footer-links .col a{display:block;font-size:14px;color:var(--ink);padding:4px 0}
+.footer-links .col a:hover{color:var(--cyan)}
+.footer-bottom{margin-top:36px;padding-top:20px;border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;color:var(--muted);font-size:12.5px}
+
+/* ---------- Toast ---------- */
+.toast{position:fixed;left:50%;bottom:34px;transform:translateX(-50%) translateY(16px);z-index:90;background:#0f1830;border:1px solid rgba(46,230,214,.5);color:var(--ink);padding:13px 22px;border-radius:11px;font-size:14px;opacity:0;transition:opacity .25s ease,transform .25s ease;pointer-events:none;max-width:86vw;text-align:center}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* ---------- 响应式 ---------- */
+@media (max-width:1024px){
+  .track-grid,.engine-grid,.steps{grid-template-columns:repeat(2,1fr)}
+  .steps::before{display:none}
+  .hero-inner{grid-template-columns:1fr;gap:36px}
+  .hero-visual{max-width:560px;margin:0 auto}
+}
+@media (max-width:820px){
+  .nav-links,.nav-cta{display:none}
+  .nav-toggle{display:flex}
+  .about-grid{grid-template-columns:1fr;gap:32px}
+  .sec{padding:68px 0}
+}
+@media (max-width:560px){
+  .track-grid,.engine-grid,.steps{grid-template-columns:1fr}
+  .container{padding:0 18px}
+  .hero{padding:60px 0 56px}
+  .footer-grid{flex-direction:column;gap:28px}
+}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{animation:none!important;transition:none!important}
+}
+</style>
+</head>
+<body>
+<div class="grain"></div>
+
+<!-- ===== 头部导航 ===== -->
+<header class="site-header">
+  <div class="container nav">
+    <a class="brand" href="#top" aria-label="新声 NovaSound 首页">
+      <svg class="mark" viewBox="0 0 64 64" fill="none" aria-hidden="true">
+        <circle cx="32" cy="32" r="30" stroke="rgba(46,230,214,.4)" stroke-width="2"/>
+        <rect x="12" y="26" width="7" height="24" rx="3.5" fill="#2ee6d6"/>
+        <rect x="23" y="16" width="7" height="42" rx="3.5" fill="#2ee6d6"/>
+        <rect x="34" y="22" width="7" height="32" rx="3.5" fill="#ff4fa3"/>
+        <rect x="45" y="12" width="7" height="46" rx="3.5" fill="#2ee6d6"/>
+      </svg>
+      <span>
+        <span class="zh">新声</span><br>
+        <span class="en">NOVASOUND</span>
+      </span>
+    </a>
+    <nav class="nav-links" aria-label="主导航">
+      <a href="#daily">今日新声</a>
+      <a href="#engine">AI 引擎</a>
+      <a href="#archive">往期单曲</a>
+      <a href="#about">关于新声</a>
+    </nav>
+    <button class="nav-toggle" id="navToggle" aria-label="打开菜单" aria-expanded="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h10"/></svg>
+    </button>
+  </div>
+  <div class="mobile-panel" id="mobilePanel">
+    <a href="#daily">今日新声</a>
+    <a href="#engine">AI 引擎</a>
+    <a href="#archive">往期单曲</a>
+    <a href="#about">关于新声</a>
+  </div>
+</header>
+
+<!-- ===== Hero ===== -->
+<section class="hero" id="top">
+  <div class="container hero-inner">
+    <div>
+      <span class="hero-pill">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h3l2-6 3 12 3-9 2 3h5"/></svg>
+        AI ELECTRONIC MUSIC PLATFORM
+      </span>
+      <h1>让世界听见<br><span class="grad">AI 的新声</span></h1>
+      <p class="sub">新声 NovaSound —— 面向全球创作者的人工智能电子音乐与歌曲发布平台。从灵感、旋律到编曲、混音与人声，全程 AI 创作，每日自动上新，让作品直达全世界听众。</p>
+      <div class="ctas">
+        <button class="btn btn-primary btn-lg" data-scroll="#daily">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+          试听今日新声
+        </button>
+        <button class="btn btn-ghost btn-lg" data-scroll="#engine">了解 AI 引擎</button>
+      </div>
+      <p class="note">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+        每日 12:30 自动上新：1 首 AI 纯音乐 + 1 首 AI 人声歌曲
+      </p>
+    </div>
+    <div class="hero-visual">
+      <div class="ring" aria-hidden="true"></div>
+      <div class="hero-disc">
+        <div class="mini-track" data-mini="t1">
+          <div class="mini-art" style="--c1:rgba(46,230,214,.5);--c2:rgba(10,61,74,.65)" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 12h4l2-6 3 12 3-9 2 3h4"/></svg>
+          </div>
+          <div>
+            <div class="tt">新声序曲 NOVA OVERTURE</div>
+            <div class="st">新声 NovaSound · 今日纯音乐</div>
+          </div>
+          <button class="play" aria-label="试听新声序曲">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+          </button>
+          <span class="badge">TODAY</span>
+        </div>
+        <div class="mini-track" data-mini="t2">
+          <div class="mini-art" style="--c1:rgba(255,79,163,.5);--c2:rgba(74,10,58,.6)" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 12h4l2-6 3 12 3-9 2 3h4"/></svg>
+          </div>
+          <div>
+            <div class="tt">追光的人 LIGHT CHASER</div>
+            <div class="st">新声 NovaSound · 今日人声</div>
+          </div>
+          <button class="play" aria-label="试听追光的人">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+          </button>
+          <span class="badge">TODAY</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <svg class="hero-wave" viewBox="0 0 1440 150" preserveAspectRatio="none" aria-hidden="true">
+    <path d="M0,75 C120,20 240,130 360,75 C480,20 600,130 720,75 C840,20 960,130 1080,75 C1200,20 1320,130 1440,75" fill="none" stroke="rgba(46,230,214,.35)" stroke-width="2"/>
+    <path d="M0,95 C140,55 260,135 400,95 C540,55 660,135 800,95 C940,55 1060,135 1200,95 C1320,62 1380,120 1440,95" fill="none" stroke="rgba(255,79,163,.28)" stroke-width="1.5"/>
+  </svg>
+</section>
+
+<!-- ===== 今日新声 ===== -->
+<section class="sec" id="daily">
+  <div class="container">
+    <div class="sec-head">
+      <span class="chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>DAILY · 每日 12:30 更新</span>
+      <h2>今日新声</h2>
+      <p>本站每天由新声 AI 引擎自动创作并上架 1 首纯音乐与 1 首人声歌曲，点击播放器在线试听。</p>
+    </div>
+    <div class="track-grid">
+      <article class="track-card" data-day="2026-09-30">
+        <div class="cover-art" style="--c1:rgba(46,230,214,.5);--c2:rgba(10,61,74,.65)">
+          <svg class="art-wave" viewBox="0 0 200 60" preserveAspectRatio="none" aria-hidden="true"><path d="M0 30 C 20 10, 40 50, 60 30 S 100 10, 120 30 S 160 50, 200 30" stroke="currentColor" fill="none" stroke-width="2.5" opacity=".9"/><path d="M0 42 C 30 26, 50 58, 80 42 S 130 26, 160 42 S 190 58, 200 42" stroke="currentColor" fill="none" stroke-width="1.5" opacity=".5"/></svg>
+          <span class="art-date">2026.09.30</span>
+          <span class="tag">纯音乐</span>
+        </div>
+        <div class="track-body">
+          <h3>新声序曲<span class="en">NOVA OVERTURE</span></h3>
+          <p class="artist">新声 NovaSound · 今日 AI 纯音乐 · 自动创作</p>
+        </div>
+        <div class="player" data-track="t1">
+          <button class="pb" aria-label="播放或暂停：新声序曲">
+            <svg class="ic-play" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+            <svg class="ic-pause" viewBox="0 0 24 24" fill="currentColor" style="display:none"><path d="M7 5h4v14H7zM13 5h4v14h-4z"/></svg>
+          </button>
+          <div class="mid">
+            <canvas class="spec" width="300" height="40" aria-hidden="true"></canvas>
+            <div class="progress-row">
+              <span class="t cur">0:00</span>
+              <input class="progress" type="range" min="0" max="1000" value="0" step="1" aria-label="播放进度">
+              <span class="t dur">0:00</span>
+            </div>
+          </div>
+        </div>
+        <audio class="audio" preload="none" src="assets/daily-2026-09-30-1.wav"></audio>
+      </article>
+
+      <article class="track-card" data-day="2026-09-30">
+        <div class="cover-art" style="--c1:rgba(255,79,163,.5);--c2:rgba(74,10,58,.6)">
+          <svg class="art-wave" viewBox="0 0 200 60" preserveAspectRatio="none" aria-hidden="true"><path d="M0 30 C 20 10, 40 50, 60 30 S 100 10, 120 30 S 160 50, 200 30" stroke="currentColor" fill="none" stroke-width="2.5" opacity=".9"/><path d="M0 42 C 30 26, 50 58, 80 42 S 130 26, 160 42 S 190 58, 200 42" stroke="currentColor" fill="none" stroke-width="1.5" opacity=".5"/></svg>
+          <span class="art-date">2026.09.30</span>
+          <span class="tag">人声</span>
+        </div>
+        <div class="track-body">
+          <h3>追光的人<span class="en">LIGHT CHASER</span></h3>
+          <p class="artist">新声 NovaSound · 今日 AI 人声 · 自动创作</p>
+        </div>
+        <div class="player" data-track="t2">
+          <button class="pb" aria-label="播放或暂停：追光的人">
+            <svg class="ic-play" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+            <svg class="ic-pause" viewBox="0 0 24 24" fill="currentColor" style="display:none"><path d="M7 5h4v14H7zM13 5h4v14h-4z"/></svg>
+          </button>
+          <div class="mid">
+            <canvas class="spec" width="300" height="40" aria-hidden="true"></canvas>
+            <div class="progress-row">
+              <span class="t cur">0:00</span>
+              <input class="progress" type="range" min="0" max="1000" value="0" step="1" aria-label="播放进度">
+              <span class="t dur">0:00</span>
+            </div>
+          </div>
+        </div>
+        <audio class="audio" preload="none" src="assets/daily-2026-09-30-2.wav"></audio>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 往期单曲 ===== -->
+<section class="sec" id="archive" style="padding-top:0">
+  <div class="container">
+    <div class="sec-head">
+      <span class="chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h10"/></svg>ARCHIVE</span>
+      <h2>往期单曲</h2>
+      <p>每日新声持续累积，往期作品随时回听。</p>
+    </div>
+    <ul class="archive" id="archiveList">
+      <!-- ARCHIVE-INSERT-POINT -->
+    </ul>
+    <p class="arch-empty">首期作品已上架「今日新声」，往期单曲将从明天开始累积。</p>
+  </div>
+</section>
+
+<!-- ===== AI 引擎 ===== -->
+<section class="sec" id="engine">
+  <div class="container">
+    <div class="sec-head">
+      <span class="chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M9 2v4M15 2v4M9 18v4M15 18v4M2 9h4M2 15h4M18 9h4M18 15h4"/></svg>NOVA AI ENGINE</span>
+      <h2>新声 AI 引擎</h2>
+      <p>四重引擎串起从灵感到成品的每一环，让专业音乐制作流程在数分钟内完成。</p>
+    </div>
+    <div class="engine-grid">
+      <div class="engine-card">
+        <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></div>
+        <h3>作曲引擎<span class="en">COMPOSITION</span></h3>
+        <p>捕捉哼唱、旋律或文字灵感，生成完整的旋律、和弦与曲式结构。</p>
+      </div>
+      <div class="engine-card">
+        <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 12h4l2-6 3 12 3-9 2 3h4"/></svg></div>
+        <h3>编曲引擎<span class="en">ARRANGEMENT</span></h3>
+        <p>自动配器编排，覆盖电子舞曲、合成器浪潮等海量音色与律动风格。</p>
+      </div>
+      <div class="engine-card">
+        <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 3v18M19 3v18M5 9h14M5 15h14" stroke-linecap="round"/><circle cx="12" cy="9" r="2" fill="currentColor"/><circle cx="12" cy="15" r="2" fill="currentColor"/></svg></div>
+        <h3>混音母带<span class="en">MIX &amp; MASTER</span></h3>
+        <p>空间、动态与响度的专业级处理，让作品达到发行级音质。</p>
+      </div>
+      <div class="engine-card">
+        <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v5m0 0a4 4 0 1 0 0 8m0-8a4 4 0 0 1 0 8m0 0v5M4 8a8 8 0 0 0 16 0"/></svg></div>
+        <h3>人声引擎<span class="en">VOCAL SYNTH</span></h3>
+        <p>合成自然逼真的人声演唱，支持中文歌词与多种情绪与唱腔。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 关于新声 ===== -->
+<section class="sec" id="about">
+  <div class="container about-grid">
+    <div class="about-copy">
+      <h2>新声，<span class="grad">AI 音乐的原点</span></h2>
+      <p>「新声 NovaSound」由专业人工智能音乐与歌曲开发公司——新声人工智能科技有限公司打造，是面向全球的人工智能电子音乐与歌曲发布平台。</p>
+      <p>我们相信，音乐创作不该被专业门槛拦在门外。当 AI 学会了作曲、编曲、混音与演唱，每一个人都能把自己的灵感变成真正的作品，并让它被世界听见。</p>
+      <div class="mission">让每个人都能用 AI 创作并发布自己的音乐。</div>
+      <p>新声由引力万向科技孵化，依托自研 Cosmo AI 引擎生态，目标成为<b style="color:var(--ink)">世界第一的人工智能电子音乐与歌曲平台</b>——这里发布的不只是歌，更是 AI 时代的新声。</p>
+    </div>
+    <aside class="about-card">
+      <h3>COMPANY PROFILE</h3>
+      <dl>
+        <div class="row"><dt>公司名称</dt><dd>新声人工智能科技有限公司<br>NovaSound AI Technology Co., Ltd.</dd></div>
+        <div class="row"><dt>业务定位</dt><dd>专业人工智能音乐与歌曲开发；运营音乐发布平台「新声 NovaSound」</dd></div>
+        <div class="row"><dt>核心能力</dt><dd>AI 作曲 · 编曲 · 混音母带 · 人声合成 · 全球发行</dd></div>
+        <div class="row"><dt>使命愿景</dt><dd>成为世界第一的人工智能电子音乐与歌曲网站</dd></div>
+        <div class="row"><dt>商务合作</dt><dd><a href="mailto:huangwei_361@163.com">huangwei_361@163.com</a></dd></div>
+        <div class="row"><dt>所在城市</dt><dd>中国 · 成都</dd></div>
+      </dl>
+    </aside>
+  </div>
+</section>
+
+<!-- ===== CTA 条 ===== -->
+<section class="cta-band">
+  <div class="container inner">
+    <h2>你的灵感，值得被世界听见</h2>
+    <p>每天 12:30，本站自动创作并上架一首 AI 纯音乐与一首人声歌曲。</p>
+    <div class="ctas">
+      <span class="daily-chip">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+        每日 12:30 自动创作 · 1 首纯音乐 + 1 首人声歌曲
+      </span>
+      <button class="btn btn-ghost btn-lg" data-scroll="#daily">试听今日新声</button>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 页脚 ===== -->
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a class="brand" href="#top">
+          <svg class="mark" viewBox="0 0 64 64" fill="none" aria-hidden="true">
+            <circle cx="32" cy="32" r="30" stroke="rgba(46,230,214,.4)" stroke-width="2"/>
+            <rect x="12" y="26" width="7" height="24" rx="3.5" fill="#2ee6d6"/>
+            <rect x="23" y="16" width="7" height="42" rx="3.5" fill="#2ee6d6"/>
+            <rect x="34" y="22" width="7" height="32" rx="3.5" fill="#ff4fa3"/>
+            <rect x="45" y="12" width="7" height="46" rx="3.5" fill="#2ee6d6"/>
+          </svg>
+          <span>
+            <span class="zh">新声</span><br>
+            <span class="en">NOVASOUND</span>
+          </span>
+        </a>
+        <p>面向全球创作者的人工智能电子音乐与歌曲发布平台。以成为世界第一的 AI 电子音乐与歌曲网站为目标。</p>
+      </div>
+      <div class="footer-links">
+        <div class="col">
+          <h4>平台</h4>
+          <a href="#daily">今日新声</a>
+          <a href="#archive">往期单曲</a>
+          <a href="#engine">AI 引擎</a>
+        </div>
+        <div class="col">
+          <h4>公司</h4>
+          <a href="#about">关于新声</a>
+          <a href="mailto:huangwei_361@163.com">商务合作</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 新声 NovaSound · 新声人工智能科技有限公司</span>
+      <span>由 Cosmo AI 引擎驱动 · 中国成都</span>
+    </div>
+  </div>
+</footer>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+  var $=function(s){return document.querySelector(s)};
+  var $$=function(s){return Array.prototype.slice.call(document.querySelectorAll(s))};
+
+  /* ---- Toast ---- */
+  var toastEl=$('#toast'), toastTimer=null;
+  function toast(msg){
+    toastEl.textContent=msg;
+    toastEl.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer=setTimeout(function(){toastEl.classList.remove('show')},2600);
+  }
+
+  /* ---- 移动端导航 ---- */
+  var panel=$('#mobilePanel'), toggle=$('#navToggle');
+  function closePanel(){panel.classList.remove('open');toggle.setAttribute('aria-expanded','false')}
+  toggle.addEventListener('click',function(){
+    var open=panel.classList.toggle('open');
+    toggle.setAttribute('aria-expanded',String(open));
+  });
+  panel.querySelectorAll('a').forEach(function(a){a.addEventListener('click',closePanel)});
+
+  /* ---- 平滑滚动 ---- */
+  $$('[data-scroll]').forEach(function(b){
+    b.addEventListener('click',function(){
+      var el=document.querySelector(b.getAttribute('data-scroll'));
+      if(el)el.scrollIntoView({behavior:'smooth'});
+    });
+  });
+
+  /* ---- 播放器 ---- */
+  var PLAY_SVG='<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
+  var PAUSE_SVG='<svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 5h4v14H7zM13 5h4v14h-4z"/></svg>';
+  function fmt(s){
+    if(!isFinite(s)||isNaN(s))s=0;
+    var m=Math.floor(s/60), ss=Math.floor(s%60);
+    return m+':'+(ss<10?'0':'')+ss;
+  }
+  function sizeCanvas(c){
+    var r=c.getBoundingClientRect(), dpr=Math.min(window.devicePixelRatio||1,2);
+    c.width=Math.max(60,Math.round(r.width*dpr));
+    c.height=Math.max(24,Math.round(r.height*dpr));
+  }
+  function drawSpectrum(st){
+    var c=st.canvas,g=st.ctx2d,w=c.width,h=c.height;
+    g.clearRect(0,0,w,h);
+    if(!st.bars){st.bars=[];for(var b=0;b<48;b++)st.bars[b]=0}
+    var bars=Math.max(2,Math.floor(w/7)), bw=w/bars;
+    for(var i=0;i<bars;i++){
+      var idx=Math.floor(i*(st.bars.length/bars));
+      var target=st.playing?(Math.random()*0.7+0.25):0;
+      st.bars[idx]+=(target-st.bars[idx])*0.22;
+      if(st.bars[idx]<0.005)st.bars[idx]=0;
+      var bh=Math.max(st.playing?3:0,st.bars[idx]*(h-4));
+      var y=(h-bh)/2;
+      var grad=g.createLinearGradient(0,y,0,y+bh);
+      grad.addColorStop(0,'#2ee6d6');
+      grad.addColorStop(1,'#ff4fa3');
+      g.fillStyle=grad;
+      g.beginPath();
+      if(g.roundRect){g.roundRect(i*bw+1,y,bw-2,bh,3)}else{g.rect(i*bw+1,y,bw-2,bh)}
+      g.fill();
+    }
+    st.raf=requestAnimationFrame(function(){drawSpectrum(st)});
+  }
+  function stopSpectrum(st){
+    if(st.raf)cancelAnimationFrame(st.raf);
+    st.raf=null;
+    st.ctx2d.clearRect(0,0,st.canvas.width,st.canvas.height);
+  }
+  function setMini(st,playing){
+    var mini=document.querySelector('.mini-track[data-mini="'+st.track+'"] .play');
+    if(mini)mini.innerHTML=playing?PAUSE_SVG:PLAY_SVG;
+  }
+  function setStopped(st){
+    st.playing=false;
+    st.btn.dataset.playing='0';
+    st.btn.querySelector('.ic-play').style.display='';
+    st.btn.querySelector('.ic-pause').style.display='none';
+    stopSpectrum(st);
+    setMini(st,false);
+  }
+  function play(st){
+    players.forEach(function(o){if(o!==st){o.audio.pause();setStopped(o)}});
+    sizeCanvas(st.canvas);
+    st.audio.volume=0.5;
+    st.audio.muted=false;
+    st.audio.play().then(function(){
+      st.playing=true;
+      st.btn.dataset.playing='1';
+      st.btn.querySelector('.ic-play').style.display='none';
+      st.btn.querySelector('.ic-pause').style.display='';
+      drawSpectrum(st);
+      setMini(st,true);
+    }).catch(function(){
+      toast('播放失败：请确认 assets 文件夹与页面在同一目录');
+      setStopped(st);
+    });
+  }
+
+  var players=$$('.player').map(function(p){
+    var st={
+      track:p.getAttribute('data-track'),
+      audio:p.parentElement.querySelector('.audio'),
+      btn:p.querySelector('.pb'),
+      canvas:p.querySelector('.spec'),
+      prog:p.querySelector('.progress'),
+      cur:p.querySelector('.cur'),
+      dur:p.querySelector('.dur'),
+      playing:false,raf:null,bars:null,
+      ctx2d:p.querySelector('.spec').getContext('2d')
+    };
+    sizeCanvas(st.canvas);
+    st.btn.addEventListener('click',function(){
+      if(st.playing){st.audio.pause();setStopped(st)}else{play(st)}
+    });
+    st.audio.addEventListener('timeupdate',function(){
+      if(isFinite(st.audio.duration)){
+        st.prog.value=Math.round(st.audio.currentTime/st.audio.duration*1000);
+        st.cur.textContent=fmt(st.audio.currentTime);
+      }
+    });
+    st.audio.addEventListener('loadedmetadata',function(){st.dur.textContent=fmt(st.audio.duration)});
+    st.audio.addEventListener('durationchange',function(){st.dur.textContent=fmt(st.audio.duration)});
+    st.audio.addEventListener('error',function(){toast('音频加载失败：请确认 assets 文件夹完整且与页面同目录')});
+    st.audio.addEventListener('ended',function(){
+      setStopped(st);st.prog.value=0;st.cur.textContent='0:00';st.dur.textContent=fmt(st.audio.duration);
+    });
+    st.audio.addEventListener('pause',function(){
+      if(!st.audio.ended)setStopped(st);
+    });
+    st.prog.addEventListener('input',function(){
+      if(isFinite(st.audio.duration)&&st.audio.duration>0){
+        st.audio.currentTime=st.prog.value/1000*st.audio.duration;
+        st.cur.textContent=fmt(st.audio.currentTime);
+      }
+    });
+    return st;
+  });
+
+  /* ---- Hero 迷你试听 ---- */
+  $$('.mini-track').forEach(function(m){
+    m.querySelector('.play').addEventListener('click',function(){
+      var st=players.find(function(p){return p.track===m.getAttribute('data-mini')});
+      if(!st)return;
+      if(st.playing){st.audio.pause();setStopped(st)}else{play(st)}
+    });
+  });
+
+  /* ---- 往期单曲播放 ---- */
+  $$('.arch-item').forEach(function(li){
+    var audio=li.querySelector('.arch-audio');
+    var btn=li.querySelector('.arch-play');
+    btn.addEventListener('click',function(){
+      if(audio.paused){
+        $$('.arch-item').forEach(function(o){var a=o.querySelector('.arch-audio');if(!a.paused)a.pause()});
+        audio.play().catch(function(){toast('播放失败：请确认音频文件完整')});
+      }else{
+        audio.pause();
+      }
+    });
+    audio.addEventListener('play',function(){btn.dataset.playing='1';btn.innerHTML=PAUSE_SVG});
+    audio.addEventListener('pause',function(){btn.dataset.playing='0';btn.innerHTML=PLAY_SVG});
+    audio.addEventListener('ended',function(){btn.dataset.playing='0';btn.innerHTML=PLAY_SVG});
+  });
+
+  window.addEventListener('resize',function(){
+    players.forEach(function(st){sizeCanvas(st.canvas)});
+  });
+  document.addEventListener('keydown',function(e){if(e.key==='Escape'){closePanel()}});
+})();
+</script>
+</body>
+</html>
